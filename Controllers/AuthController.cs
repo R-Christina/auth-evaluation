@@ -26,13 +26,13 @@ namespace auth.Controllers
         public async Task<IActionResult> Login([FromBody] Users login)
         {
             var user = await _dbContext.Users
-                .SingleOrDefaultAsync(u => u.email == login.email && u.password == login.password);
+                .SingleOrDefaultAsync(u => u.matricule == login.matricule && u.password == login.password);
 
             if (user != null)
             {
                 var claims = new[]
                 {
-                    new Claim(ClaimTypes.Email, user.email),
+                    new Claim(ClaimTypes.Name, user.matricule.ToString()),
                     new Claim(ClaimTypes.NameIdentifier, user.user_id.ToString()),
                     new Claim(ClaimTypes.GroupSid, user.emp_id.ToString())
                 };
@@ -53,7 +53,7 @@ namespace auth.Controllers
             }
             else
             {
-                return Unauthorized("Email ou mot de passe incorrect");
+                return Unauthorized("Matricule ou mot de passe incorrect");
             }
 
             return Unauthorized();

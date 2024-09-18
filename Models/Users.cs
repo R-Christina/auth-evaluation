@@ -7,7 +7,7 @@ namespace auth.Models
         [Key]
         public int user_id { get; set; }
         public int emp_id { get; set; }
-        public string email { get; set; }
+        public int matricule { get; set; }
         public string password { get; set; }
         
     }
