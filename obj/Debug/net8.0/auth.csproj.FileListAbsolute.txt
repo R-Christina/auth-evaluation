@@ -137,3 +137,4 @@ D:\stage\projet\evaluation\auth\obj\Debug\net8.0\refint\auth.dll
 D:\stage\projet\evaluation\auth\obj\Debug\net8.0\auth.pdb
 D:\stage\projet\evaluation\auth\obj\Debug\net8.0\auth.genruntimeconfig.cache
 D:\stage\projet\evaluation\auth\obj\Debug\net8.0\ref\auth.dll
+D:\stage\projet\evaluation\auth\bin\Debug\net8.0\BCrypt.Net-Next.dll

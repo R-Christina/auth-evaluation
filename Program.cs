@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using auth.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +34,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .EnableSensitiveDataLogging() // Pour voir les données sensibles dans le log
+        .LogTo(Console.WriteLine, LogLevel.Information));
 
 builder.Services.AddCors(options =>
 {
@@ -45,6 +48,18 @@ builder.Services.AddCors(options =>
                   .AllowAnyHeader();
         });
 });
+
+var smtpSettings = builder.Configuration.GetSection("Smtp");
+
+builder.Services.AddScoped<EmailService>(sp => new EmailService(
+    smtpSettings["Host"],
+    int.Parse(smtpSettings["Port"]),
+    smtpSettings["Username"],
+    smtpSettings["Password"]
+));
+
+// Program.cs
+builder.Services.AddScoped<PasswordHasher>();
 
 
 var app = builder.Build();

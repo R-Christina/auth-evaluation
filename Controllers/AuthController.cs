@@ -23,18 +23,30 @@ namespace auth.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] Users login)
+        public async Task<IActionResult> Login([FromBody] LoginRequest login)
         {
             var user = await _dbContext.Users
+                .Include(u => u.emp)
+                .Include(u => u.role)
                 .SingleOrDefaultAsync(u => u.matricule == login.matricule && u.password == login.password);
 
             if (user != null)
             {
+                if (user?.emp == null)
+                {
+                    return BadRequest("Employee information is missing");
+                }
+
+
                 var claims = new[]
                 {
                     new Claim(ClaimTypes.Name, user.matricule.ToString()),
                     new Claim(ClaimTypes.NameIdentifier, user.user_id.ToString()),
-                    new Claim(ClaimTypes.GroupSid, user.emp_id.ToString())
+                    new Claim(ClaimTypes.GroupSid, user.emp_id.ToString()),
+                    new Claim("emp_id", user.emp.emp_id.ToString()), 
+                    new Claim("emp_nom", user.emp.emp_nom), 
+                    new Claim("emp_prenom", user.emp.emp_prenom),
+                    new Claim(ClaimTypes.Role, user.role.role_id.ToString())
                 };
 
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"]));
@@ -49,14 +61,23 @@ namespace auth.Controllers
 
                 var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-                return Ok(new { Token = tokenString });
+                // Build the response with the token and user information
+                return Ok(new 
+                { 
+                    Token = tokenString,
+                    User = new 
+                    {
+                        emp_id = user.emp_id,
+                        emp_nom = user.emp.emp_nom,
+                        emp_prenom = user.emp.emp_prenom,
+                        role_id = user.role.role_id,
+                    }
+                });
             }
             else
             {
                 return Unauthorized("Matricule ou mot de passe incorrect");
             }
-
-            return Unauthorized();
         }
     }
 }
